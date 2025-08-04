@@ -5,6 +5,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 const enum eViewMode {
   MONTHLY = "MONTHLY",
@@ -50,17 +60,17 @@ export default function MortgageCalculator() {
 
   const grouped = view === eViewMode.YEARLY
     ? Array.from({ length: loanTerm }, (_, i) => {
-        const yearData = schedule.slice(i * 12, (i + 1) * 12);
-        const sum = (key: any) => yearData.reduce((a, b) => a + (b as any)[key], 0);
-        return {
-          month: undefined,
-          year: i + 1,
-          principal: Number(sum("principal").toFixed(2)),
-          interest: Number(sum("interest").toFixed(2)),
-          total: Number(sum("total").toFixed(2)),
-          remainingDebt: Number((yearData.at(-1)?.remainingDebt ?? 0).toFixed(2)),
-        };
-      })
+      const yearData = schedule.slice(i * 12, (i + 1) * 12);
+      const sum = (key: any) => yearData.reduce((a, b) => a + (b as any)[key], 0);
+      return {
+        month: undefined,
+        year: i + 1,
+        principal: Number(sum("principal").toFixed(2)),
+        interest: Number(sum("interest").toFixed(2)),
+        total: Number(sum("total").toFixed(2)),
+        remainingDebt: Number((yearData.at(-1)?.remainingDebt ?? 0).toFixed(2)),
+      };
+    })
     : schedule;
 
   return (
@@ -118,6 +128,21 @@ export default function MortgageCalculator() {
           <TabsTrigger value={eViewMode.YEARLY}>Yearly</TabsTrigger>
         </TabsList>
       </Tabs>
+
+      <div className="mb-8">
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={grouped}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey={view === eViewMode.YEARLY ? "year" : "month"} />
+            <YAxis />
+            <Tooltip formatter={(value: number) => `€${value.toFixed(2)}`} />
+            <Legend />
+            <Line type="monotone" dataKey="principal" stroke="#4ade80" name="Principal" />
+            <Line type="monotone" dataKey="interest" stroke="#60a5fa" name="Interest" />
+            <Line type="monotone" dataKey="remainingDebt" stroke="#f97316" name="Remaining Debt" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
 
       <div className="grid gap-2">
         {grouped.map((entry, i) => (
