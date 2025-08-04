@@ -31,12 +31,17 @@ export default function MortgageCalculator() {
     (loanAmount * monthlyInterest) /
     (1 - Math.pow(1 + monthlyInterest, -totalPayments));
 
+  let remainingDebt = loanAmount;
   const schedule = Array.from({ length: totalPayments }, (_, i) => {
-    const interest = loanAmount * monthlyInterest;
+    const interest = remainingDebt * monthlyInterest;
     const principal = monthlyPayment - interest;
+    const currentDebt = remainingDebt;
+    remainingDebt -= principal;
+
     return {
       month: i + 1,
       year: Math.floor(i / 12) + 1,
+      remainingDebt: Number(currentDebt.toFixed(2)),
       principal: Number(principal.toFixed(2)),
       interest: Number(interest.toFixed(2)),
       total: Number(monthlyPayment.toFixed(2)),
@@ -52,7 +57,8 @@ export default function MortgageCalculator() {
         year: i + 1,
         principal: Number(sum("principal").toFixed(2)),
         interest: Number(sum("interest").toFixed(2)),
-        total: Number(sum("total").toFixed(2))
+        total: Number(sum("total").toFixed(2)),
+        remainingDebt: Number((yearData.at(-1)?.remainingDebt ?? 0).toFixed(2)),
       };
     })
     : schedule;
