@@ -24,6 +24,7 @@ import {
   groupByYear,
   numberOrDefault,
   generateRepaymentPlan,
+  formatCurrency,
 } from "@/lib/morgage";
 
 const enum eViewMode {
@@ -54,7 +55,7 @@ export default function MortgageCalculator() {
     ? groupByYear(schedule, loanTerm)
     : schedule;
 
-  const repaymentPlan = generateRepaymentPlan(loanAmount, monthlyInterest);
+  const repaymentPlan = generateRepaymentPlan(loanAmount, interestRate);
 
   return (
     <div className="max-w-3xl mx-auto p-4">
@@ -100,17 +101,22 @@ export default function MortgageCalculator() {
       </div>
 
       <div className="mb-8">
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={150}>
           <LineChart data={repaymentPlan}>
             <CartesianGrid strokeDasharray="3 3" />
             <Legend />
             <YAxis />
             <XAxis dataKey="term" label={{ value: "Loan Term (Years)", position: "insideBottomRight", offset: -5 }} />
-
-            <Tooltip formatter={(value: number) => `€${value.toFixed(2)}`} />
+            <Tooltip formatter={formatCurrency} />
             <Line type="monotone" dataKey="monthlyPayment" stroke="#0ea5e9" name="Monthly Payment" />
-            {/* <Line type="monotone" dataKey="totalPaid" stroke="#e90e50ff" name="Total Paid" /> */}
-
+          </LineChart>
+        </ResponsiveContainer>
+        <ResponsiveContainer width="100%" height={150}>
+          <LineChart data={repaymentPlan}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <Legend />
+            <YAxis />
+            <XAxis dataKey="term" label={{ value: "Loan Term (Years)", position: "insideBottomRight", offset: -5 }} />
             <Tooltip formatter={(value: number) => `${value.toFixed(2)} %`} />
             <Line type="monotone" dataKey="interest" stroke="#e80000ff" name="Interest" />
           </LineChart>
@@ -118,9 +124,9 @@ export default function MortgageCalculator() {
       </div>
 
       <div className="mb-6 p-4 bg-gray-100 rounded-md text-sm">
-        <p>💸 <strong>Loan Amount:</strong> €{loanAmount.toLocaleString()}</p>
+        <p>💸 <strong>Loan Amount:</strong> {formatCurrency(loanAmount)}</p>
         <p>📆 <strong>Total Payments:</strong> {totalPayments} months</p>
-        <p>📥 <strong>Monthly Payment:</strong> €{monthlyPayment.toFixed(2)}</p>
+        <p>📥 <strong>Monthly Payment:</strong> {formatCurrency(monthlyPayment)}</p>
       </div>
 
 
@@ -137,7 +143,7 @@ export default function MortgageCalculator() {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={view === eViewMode.YEARLY ? "year" : "month"} />
             <YAxis />
-            <Tooltip formatter={(value: number) => `€${value.toFixed(2)}`} />
+            <Tooltip formatter={formatCurrency} />
             <Legend />
             {/* <Line type="monotone" dataKey="principal" stroke="#4ade80" name="Principal" />
             <Line type="monotone" dataKey="interest" stroke="#60a5fa" name="Interest" /> */}
@@ -156,14 +162,14 @@ export default function MortgageCalculator() {
                 {view === eViewMode.YEARLY ? `Year ${entry.year}` : `Month ${entry.month} (Year ${entry.year})`}:
               </span>
               <span className="flex flex-col items-end">
-                <span>💸 Total: €{entry.total.toFixed(2)}</span>
-                <span>📉 Principal: €{entry.principal.toFixed(2)}</span>
-                <span>🧾 Interest: €{entry.interest.toFixed(2)}</span>
-                <span>💼 Remaining: €{entry.remainingDebt.toFixed(2)}</span>
+                <span>💸 Total: {formatCurrency(entry.total)}</span>
+                <span>📉 Principal: {formatCurrency(entry.principal)}</span>
+                <span>🧾 Interest: {formatCurrency(entry.interest)}</span>
+                <span>💼 Remaining: {formatCurrency(entry.remainingDebt)}</span>
                 <br />
-                <span>📉 Total Principal Paid: €{entry.totalPrincipalPaid.toFixed(2)}</span>
-                <span>🧾 Total Interest Paid: €{entry.totalInterestPaid.toFixed(2)}</span>
-                <span>💰 Total Paid: €{(entry.totalPrincipalPaid + entry.totalInterestPaid).toFixed(2)}</span>
+                <span>📉 Total Principal Paid: {formatCurrency(entry.totalPrincipalPaid)}</span>
+                <span>🧾 Total Interest Paid: {formatCurrency(entry.totalInterestPaid)}</span>
+                <span>💰 Total Paid: {formatCurrency(entry.totalPrincipalPaid + entry.totalInterestPaid)}</span>
               </span>
             </CardContent>
           </Card>

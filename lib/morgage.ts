@@ -1,6 +1,17 @@
 
 export function range(min: number, max: number): number[] {
-    return Array.from({ length: max - min + 1 }, (_, i) => i + min);
+    return Array.from({ length: max - min }, (_, i) => i + min);
+}
+
+export function formatCurrency(value: number): string {
+    return `€${value.toLocaleString("en-DE", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    })}`;
+}
+
+export function round(value: number): number {
+    return Number(value.toFixed(2));
 }
 
 export function numberOrDefault(value: number | string, defaultValue: number = 0): number {
@@ -25,7 +36,7 @@ export function generateSchedule(loanAmount: number, monthlyInterest: number, mo
     let cumulativePrincipal = 0;
     let cumulativeInterest = 0;
 
-    return range(0, totalPayments).map(i => {
+    return range(1, totalPayments + 1).map(month => {
         const interest = remainingDebt * monthlyInterest;
         const principal = monthlyPayment - interest;
         const currentDebt = remainingDebt;
@@ -34,39 +45,39 @@ export function generateSchedule(loanAmount: number, monthlyInterest: number, mo
         cumulativeInterest += interest;
 
         return {
-            month: i + 1,
-            year: Math.floor(i / 12) + 1,
-            remainingDebt: Number(currentDebt.toFixed(2)),
-            principal: Number(principal.toFixed(2)),
-            interest: Number(interest.toFixed(2)),
-            total: Number(monthlyPayment.toFixed(2)),
-            totalPrincipalPaid: Number(cumulativePrincipal.toFixed(2)),
-            totalInterestPaid: Number(cumulativeInterest.toFixed(2)),
+            month: month,
+            year: Math.floor((month - 1) / 12) + 1,
+            remainingDebt: round(currentDebt),
+            principal: round(principal),
+            interest: round(interest),
+            total: round(monthlyPayment),
+            totalPrincipalPaid: round(cumulativePrincipal),
+            totalInterestPaid: round(cumulativeInterest),
         };
     });
 }
 
 export function groupByYear(schedule: any[], loanTerm: number) {
-    return range(0, loanTerm).map(i => {
-        const yearData = schedule.slice(i * 12, (i + 1) * 12);
+    return range(1, loanTerm + 1).map(year => {
+        const yearData = schedule.slice((year - 1) * 12, year * 12);
         const sum = (key: any) => yearData.reduce((a, b) => a + (b as any)[key], 0);
         return {
-            month: undefined,
-            year: i + 1,
-            principal: Number(sum("principal").toFixed(2)),
-            interest: Number(sum("interest").toFixed(2)),
-            total: Number(sum("total").toFixed(2)),
-            remainingDebt: Number((yearData.at(-1)?.remainingDebt ?? 0).toFixed(2)),
-            totalPrincipalPaid: Number((yearData.at(-1)?.totalPrincipalPaid ?? 0).toFixed(2)),
-            totalInterestPaid: Number((yearData.at(-1)?.totalInterestPaid ?? 0).toFixed(2)),
+            month: 0,
+            year: year,
+            principal: round(sum("principal")),
+            interest: round(sum("interest")),
+            total: round(sum("total")),
+            remainingDebt: round((yearData.at(-1)?.remainingDebt ?? 0)),
+            totalPrincipalPaid: round((yearData.at(-1)?.totalPrincipalPaid ?? 0)),
+            totalInterestPaid: round((yearData.at(-1)?.totalInterestPaid ?? 0)),
         };
     });
 }
 
 
 export function generateRepaymentPlan(loanAmount: number, interestRate: number) {
-    return range(4, 30).map((i) => {
-        const term = i + 1;
+    return range(5, 30 + 1).map((i) => {
+        const term = i;
         const monthlyInterest = calculateMonthlyInterest(interestRate);
         const totalPayments = calculateTotalPayments(term);
         const monthlyPayment = calculateMonthlyPayment(loanAmount, monthlyInterest, totalPayments);
@@ -74,9 +85,9 @@ export function generateRepaymentPlan(loanAmount: number, interestRate: number) 
         const interest = totalPaid / loanAmount * 100;
         return {
             term,
-            interest: Number(interest.toFixed(4)),
-            totalPaid: Number(totalPaid.toFixed(2)),
-            monthlyPayment: Number(monthlyPayment.toFixed(2)),
+            interest: round(interest),
+            totalPaid: round(totalPaid),
+            monthlyPayment: round(monthlyPayment),
         };
     });
 }
