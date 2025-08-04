@@ -25,6 +25,7 @@ import {
   numberOrDefault,
   generateRepaymentPlan,
   formatCurrency,
+  round,
 } from "@/lib/morgage";
 
 const enum eViewMode {
@@ -50,7 +51,6 @@ export default function MortgageCalculator() {
   const totalPayments = calculateTotalPayments(loanTerm);
   const monthlyPayment = calculateMonthlyPayment(loanAmount, monthlyInterest, totalPayments);
   const schedule = generateSchedule(loanAmount, monthlyInterest, monthlyPayment, totalPayments);
-
   const grouped = view === eViewMode.YEARLY
     ? groupByYear(schedule, loanTerm)
     : schedule;
@@ -100,6 +100,15 @@ export default function MortgageCalculator() {
         </div>
       </div>
 
+      <div className="mb-6 p-4 bg-gray-100 rounded-md text-sm">
+        <p>💸 <strong>Loan Amount:</strong> {formatCurrency(loanAmount)}</p>
+        <p>📆 <strong>Total Payments:</strong> {totalPayments} months</p>
+        <p>📥 <strong>Monthly Payment:</strong> {formatCurrency(monthlyPayment)}</p>
+        <hr />
+        <p>💰 <strong>Total Payment:</strong> {formatCurrency(monthlyPayment * totalPayments)}</p>
+        <p>📊 <strong>Interest:</strong> {round(monthlyPayment * totalPayments / loanAmount * 100 - 100)}%</p>
+      </div>
+
       <div className="mb-8">
         <ResponsiveContainer width="100%" height={150}>
           <LineChart data={repaymentPlan}>
@@ -122,13 +131,6 @@ export default function MortgageCalculator() {
           </LineChart>
         </ResponsiveContainer>
       </div>
-
-      <div className="mb-6 p-4 bg-gray-100 rounded-md text-sm">
-        <p>💸 <strong>Loan Amount:</strong> {formatCurrency(loanAmount)}</p>
-        <p>📆 <strong>Total Payments:</strong> {totalPayments} months</p>
-        <p>📥 <strong>Monthly Payment:</strong> {formatCurrency(monthlyPayment)}</p>
-      </div>
-
 
       <Tabs value={view} onValueChange={(v) => setView(v as eViewMode)} className="mb-4">
         <TabsList>

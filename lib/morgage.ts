@@ -74,15 +74,14 @@ export function groupByYear(schedule: any[], loanTerm: number) {
     });
 }
 
-
 export function generateRepaymentPlan(loanAmount: number, interestRate: number) {
-    return range(5, 30 + 1).map((i) => {
+    return range(1, 30 + 1).map((i) => {
         const term = i;
         const monthlyInterest = calculateMonthlyInterest(interestRate);
         const totalPayments = calculateTotalPayments(term);
         const monthlyPayment = calculateMonthlyPayment(loanAmount, monthlyInterest, totalPayments);
         const totalPaid = monthlyPayment * totalPayments;
-        const interest = totalPaid / loanAmount * 100;
+        const interest = totalPaid / loanAmount * 100 - 100;
         return {
             term,
             interest: round(interest),
