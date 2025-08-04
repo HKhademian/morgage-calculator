@@ -48,11 +48,16 @@ export default function MortgageCalculator() {
     (1 - Math.pow(1 + monthlyInterest, -totalPayments));
 
   let remainingDebt = loanAmount;
+  let cumulativePrincipal = 0;
+  let cumulativeInterest = 0;
+
   const schedule = Array.from({ length: totalPayments }, (_, i) => {
     const interest = remainingDebt * monthlyInterest;
     const principal = monthlyPayment - interest;
     const currentDebt = remainingDebt;
     remainingDebt -= principal;
+    cumulativePrincipal += principal;
+    cumulativeInterest += interest;
 
     return {
       month: i + 1,
@@ -61,6 +66,8 @@ export default function MortgageCalculator() {
       principal: Number(principal.toFixed(2)),
       interest: Number(interest.toFixed(2)),
       total: Number(monthlyPayment.toFixed(2)),
+      totalPrincipalPaid: Number(cumulativePrincipal.toFixed(2)),
+      totalInterestPaid: Number(cumulativeInterest.toFixed(2)),
     };
   });
 
@@ -75,6 +82,8 @@ export default function MortgageCalculator() {
         interest: Number(sum("interest").toFixed(2)),
         total: Number(sum("total").toFixed(2)),
         remainingDebt: Number((yearData.at(-1)?.remainingDebt ?? 0).toFixed(2)),
+        totalPrincipalPaid: Number((yearData.at(-1)?.totalPrincipalPaid ?? 0).toFixed(2)),
+        totalInterestPaid: Number((yearData.at(-1)?.totalInterestPaid ?? 0).toFixed(2)),
       };
     })
     : schedule;
@@ -143,9 +152,11 @@ export default function MortgageCalculator() {
             <YAxis />
             <Tooltip formatter={(value: number) => `€${value.toFixed(2)}`} />
             <Legend />
-            <Line type="monotone" dataKey="principal" stroke="#4ade80" name="Principal" />
-            <Line type="monotone" dataKey="interest" stroke="#60a5fa" name="Interest" />
+            {/* <Line type="monotone" dataKey="principal" stroke="#4ade80" name="Principal" />
+            <Line type="monotone" dataKey="interest" stroke="#60a5fa" name="Interest" /> */}
             <Line type="monotone" dataKey="remainingDebt" stroke="#f97316" name="Remaining Debt" />
+            <Line type="monotone" dataKey="totalPrincipalPaid" stroke="#16a34a" name="Total Principal Paid" strokeDasharray="3 3" />
+            <Line type="monotone" dataKey="totalInterestPaid" stroke="#2563eb" name="Total Interest Paid" strokeDasharray="3 3" />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -162,6 +173,10 @@ export default function MortgageCalculator() {
                 <span>📉 Principal: €{entry.principal.toFixed(2)}</span>
                 <span>🧾 Interest: €{entry.interest.toFixed(2)}</span>
                 <span>💼 Remaining: €{entry.remainingDebt.toFixed(2)}</span>
+                <br />
+                <span>📉 Total Principal Paid: €{entry.totalPrincipalPaid.toFixed(2)}</span>
+                <span>🧾 Total Interest Paid: €{entry.totalInterestPaid.toFixed(2)}</span>
+                <span>💰 Total Paid: €{(entry.totalPrincipalPaid + entry.totalInterestPaid).toFixed(2)}</span>
               </span>
             </CardContent>
           </Card>
