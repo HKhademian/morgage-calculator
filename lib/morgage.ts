@@ -1,4 +1,8 @@
 
+export function range(min: number, max: number): number[] {
+    return Array.from({ length: max - min + 1 }, (_, i) => i + min);
+}
+
 export function numberOrDefault(value: number | string, defaultValue: number = 0): number {
     const num = Number(value);
     return isNaN(num) ? defaultValue : num;
@@ -21,7 +25,7 @@ export function generateSchedule(loanAmount: number, monthlyInterest: number, mo
     let cumulativePrincipal = 0;
     let cumulativeInterest = 0;
 
-    return Array.from({ length: totalPayments }, (_, i) => {
+    return range(0, totalPayments).map(i => {
         const interest = remainingDebt * monthlyInterest;
         const principal = monthlyPayment - interest;
         const currentDebt = remainingDebt;
@@ -43,7 +47,7 @@ export function generateSchedule(loanAmount: number, monthlyInterest: number, mo
 }
 
 export function groupByYear(schedule: any[], loanTerm: number) {
-    return Array.from({ length: loanTerm }, (_, i) => {
+    return range(0, loanTerm).map(i => {
         const yearData = schedule.slice(i * 12, (i + 1) * 12);
         const sum = (key: any) => yearData.reduce((a, b) => a + (b as any)[key], 0);
         return {
