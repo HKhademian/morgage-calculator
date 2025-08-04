@@ -4,7 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-enum eViewMode { MONTHLY = { eViewMode.MONTHLY }, YEARLY = "YEARLY" };
+const enum eViewMode {
+  MONTHLY =  "MONTHLY" ,
+  YEARLY = "YEARLY",
+};
+
 const DEFAULT_PRICE = 400_000;
 const DEFAULT_DOWN = 40_000;
 const DEFAULT_INT = 3.65;
