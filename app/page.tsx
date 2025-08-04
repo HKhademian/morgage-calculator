@@ -23,6 +23,7 @@ import {
   generateSchedule,
   groupByYear,
   numberOrDefault,
+  generateRepaymentPlan,
 } from "@/lib/morgage";
 
 const enum eViewMode {
@@ -53,16 +54,7 @@ export default function MortgageCalculator() {
     ? groupByYear(schedule, loanTerm)
     : schedule;
 
-  const data = Array.from({ length: 30 }, (_, i) => {
-    const term = i + 1;
-    const monthlyInterest = calculateMonthlyInterest(interestRate);
-    const totalPayments = calculateTotalPayments(term);
-    const monthlyPayment = calculateMonthlyPayment(loanAmount, monthlyInterest, totalPayments);
-    return {
-      term,
-      monthlyPayment: Number(monthlyPayment.toFixed(2)),
-    };
-  });
+  const repaymentPlan = generateRepaymentPlan(loanAmount, monthlyInterest);
 
   return (
     <div className="max-w-3xl mx-auto p-4">
@@ -109,13 +101,18 @@ export default function MortgageCalculator() {
 
       <div className="mb-8">
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
+          <LineChart data={repaymentPlan}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="term" label={{ value: "Loan Term (Years)", position: "insideBottomRight", offset: -5 }} />
-            <YAxis />
-            <Tooltip formatter={(value: number) => `€${value.toFixed(2)}`} />
             <Legend />
+            <YAxis />
+            <XAxis dataKey="term" label={{ value: "Loan Term (Years)", position: "insideBottomRight", offset: -5 }} />
+
+            <Tooltip formatter={(value: number) => `€${value.toFixed(2)}`} />
             <Line type="monotone" dataKey="monthlyPayment" stroke="#0ea5e9" name="Monthly Payment" />
+            {/* <Line type="monotone" dataKey="totalPaid" stroke="#e90e50ff" name="Total Paid" /> */}
+
+            <Tooltip formatter={(value: number) => `${value.toFixed(2)} %`} />
+            <Line type="monotone" dataKey="interest" stroke="#e80000ff" name="Interest" />
           </LineChart>
         </ResponsiveContainer>
       </div>

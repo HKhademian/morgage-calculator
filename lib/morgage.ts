@@ -62,3 +62,21 @@ export function groupByYear(schedule: any[], loanTerm: number) {
         };
     });
 }
+
+
+export function generateRepaymentPlan(loanAmount: number, interestRate: number) {
+    return range(4, 30).map((i) => {
+        const term = i + 1;
+        const monthlyInterest = calculateMonthlyInterest(interestRate);
+        const totalPayments = calculateTotalPayments(term);
+        const monthlyPayment = calculateMonthlyPayment(loanAmount, monthlyInterest, totalPayments);
+        const totalPaid = monthlyPayment * totalPayments;
+        const interest = totalPaid / loanAmount * 100;
+        return {
+            term,
+            interest: Number(interest.toFixed(4)),
+            totalPaid: Number(totalPaid.toFixed(2)),
+            monthlyPayment: Number(monthlyPayment.toFixed(2)),
+        };
+    });
+}
