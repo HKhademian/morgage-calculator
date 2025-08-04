@@ -28,7 +28,7 @@ export default function MortgageCalculator() {
   const monthlyInterest = interestRate / 100 / 12;
   const totalPayments = loanTerm * 12;
   const monthlyPayment =
-  (loanAmount * monthlyInterest) /
+    (loanAmount * monthlyInterest) /
     (1 - Math.pow(1 + monthlyInterest, -totalPayments));
 
   let remainingDebt = loanAmount;
@@ -50,17 +50,17 @@ export default function MortgageCalculator() {
 
   const grouped = view === eViewMode.YEARLY
     ? Array.from({ length: loanTerm }, (_, i) => {
-      const yearData = schedule.slice(i * 12, (i + 1) * 12);
-      const sum = (key: any) => yearData.reduce((a, b) => a + (b as any)[key], 0);
-      return {
-        month: undefined,
-        year: i + 1,
-        principal: Number(sum("principal").toFixed(2)),
-        interest: Number(sum("interest").toFixed(2)),
-        total: Number(sum("total").toFixed(2)),
-        remainingDebt: Number((yearData.at(-1)?.remainingDebt ?? 0).toFixed(2)),
-      };
-    })
+        const yearData = schedule.slice(i * 12, (i + 1) * 12);
+        const sum = (key: any) => yearData.reduce((a, b) => a + (b as any)[key], 0);
+        return {
+          month: undefined,
+          year: i + 1,
+          principal: Number(sum("principal").toFixed(2)),
+          interest: Number(sum("interest").toFixed(2)),
+          total: Number(sum("total").toFixed(2)),
+          remainingDebt: Number((yearData.at(-1)?.remainingDebt ?? 0).toFixed(2)),
+        };
+      })
     : schedule;
 
   return (
@@ -68,30 +68,48 @@ export default function MortgageCalculator() {
       <h1 className="text-2xl font-bold mb-4">🏡 Mortgage Repayment Calculator</h1>
 
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <Input
-          type="number"
-          value={price}
-          onChange={(e) => setPrice(Number(e.target.value))}
-          placeholder="House Price"
-        />
-        <Input
-          type="number"
-          value={downPayment}
-          onChange={(e) => setDownPayment(Number(e.target.value))}
-          placeholder="Down Payment"
-        />
-        <Input
-          type="number"
-          value={interestRate}
-          onChange={(e) => setInterestRate(Number(e.target.value))}
-          placeholder="Interest Rate (%)"
-        />
-        <Input
-          type="number"
-          value={loanTerm}
-          onChange={(e) => setLoanTerm(Number(e.target.value))}
-          placeholder="Loan Term (Years)"
-        />
+        <div>
+          <label className="text-sm font-medium">🏠 House Price (€)</label>
+          <Input
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(Number(e.target.value))}
+            placeholder="House Price"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium">💰 Down Payment (€)</label>
+          <Input
+            type="number"
+            value={downPayment}
+            onChange={(e) => setDownPayment(Number(e.target.value))}
+            placeholder="Down Payment"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium">📊 Interest Rate (%)</label>
+          <Input
+            type="number"
+            value={interestRate}
+            onChange={(e) => setInterestRate(Number(e.target.value))}
+            placeholder="Interest Rate"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium">📆 Loan Term (Years)</label>
+          <Input
+            type="number"
+            value={loanTerm}
+            onChange={(e) => setLoanTerm(Number(e.target.value))}
+            placeholder="Loan Term"
+          />
+        </div>
+      </div>
+
+      <div className="mb-6 p-4 bg-gray-100 rounded-md text-sm">
+        <p>💸 <strong>Loan Amount:</strong> €{loanAmount.toLocaleString()}</p>
+        <p>📆 <strong>Total Payments:</strong> {totalPayments} months</p>
+        <p>📥 <strong>Monthly Payment:</strong> €{monthlyPayment.toFixed(2)}</p>
       </div>
 
       <Tabs value={view} onValueChange={(v) => setView(v as eViewMode)} className="mb-4">
