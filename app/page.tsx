@@ -26,7 +26,6 @@ function numberOrDefault(value: number | string, defaultValue: number = 0): numb
   return isNaN(num) ? defaultValue : num;
 }
 
-
 const DEFAULT_PRICE = 400_000;
 const DEFAULT_DOWN = 40_000;
 const DEFAULT_INT = 3.65;
@@ -98,7 +97,7 @@ export default function MortgageCalculator() {
           <Input
             type="number"
             value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
+            onChange={(e) => setPrice(numberOrDefault(e.target.value))}
             placeholder="House Price"
           />
         </div>
@@ -107,7 +106,7 @@ export default function MortgageCalculator() {
           <Input
             type="number"
             value={downPayment}
-            onChange={(e) => setDownPayment(Number(e.target.value))}
+            onChange={(e) => setDownPayment(numberOrDefault(e.target.value))}
             placeholder="Down Payment"
           />
         </div>
@@ -116,7 +115,7 @@ export default function MortgageCalculator() {
           <Input
             type="number"
             value={interestRate}
-            onChange={(e) => setInterestRate(Number(e.target.value))}
+            onChange={(e) => setInterestRate(numberOrDefault(e.target.value))}
             placeholder="Interest Rate"
           />
         </div>
@@ -125,7 +124,7 @@ export default function MortgageCalculator() {
           <Input
             type="number"
             value={loanTerm}
-            onChange={(e) => setLoanTerm(Number(e.target.value))}
+            onChange={(e) => setLoanTerm(numberOrDefault(e.target.value))}
             placeholder="Loan Term"
           />
         </div>
