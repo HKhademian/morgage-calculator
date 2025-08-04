@@ -21,36 +21,35 @@ const enum eViewMode {
   YEARLY = "YEARLY",
 };
 
-function numberOrDefault(value: number | string, defaultValue: number = 0): number {
-  const num = Number(value);
-  return isNaN(num) ? defaultValue : num;
-}
-
 const DEFAULT_PRICE = 400_000;
 const DEFAULT_DOWN = 40_000;
 const DEFAULT_INT = 3.65;
 const DEFAULT_TERM = 30;
 const DEFAULT_VIEW = eViewMode.YEARLY;
 
-export default function MortgageCalculator() {
-  const [price, setPrice] = useState(DEFAULT_PRICE);
-  const [downPayment, setDownPayment] = useState(DEFAULT_DOWN);
-  const [interestRate, setInterestRate] = useState(DEFAULT_INT);
-  const [loanTerm, setLoanTerm] = useState(DEFAULT_TERM);
-  const [view, setView] = useState(DEFAULT_VIEW);
+function numberOrDefault(value: number | string, defaultValue: number = 0): number {
+  const num = Number(value);
+  return isNaN(num) ? defaultValue : num;
+}
 
-  const loanAmount = price - downPayment;
-  const monthlyInterest = interestRate / 100 / 12;
-  const totalPayments = loanTerm * 12;
-  const monthlyPayment =
-    (loanAmount * monthlyInterest) /
-    (1 - Math.pow(1 + monthlyInterest, -totalPayments));
+function calculateMonthlyInterest(rate: number) {
+  return rate / 100 / 12;
+}
 
+function calculateTotalPayments(termYears: number) {
+  return termYears * 12;
+}
+
+function calculateMonthlyPayment(loanAmount: number, monthlyInterest: number, totalPayments: number) {
+  return (loanAmount * monthlyInterest) / (1 - Math.pow(1 + monthlyInterest, -totalPayments));
+}
+
+function generateSchedule(loanAmount: number, monthlyInterest: number, monthlyPayment: number, totalPayments: number) {
   let remainingDebt = loanAmount;
   let cumulativePrincipal = 0;
   let cumulativeInterest = 0;
 
-  const schedule = Array.from({ length: totalPayments }, (_, i) => {
+  return Array.from({ length: totalPayments }, (_, i) => {
     const interest = remainingDebt * monthlyInterest;
     const principal = monthlyPayment - interest;
     const currentDebt = remainingDebt;
@@ -69,22 +68,40 @@ export default function MortgageCalculator() {
       totalInterestPaid: Number(cumulativeInterest.toFixed(2)),
     };
   });
+}
+
+function groupByYear(schedule: any[], loanTerm: number) {
+  return Array.from({ length: loanTerm }, (_, i) => {
+    const yearData = schedule.slice(i * 12, (i + 1) * 12);
+    const sum = (key: any) => yearData.reduce((a, b) => a + (b as any)[key], 0);
+    return {
+      month: undefined,
+      year: i + 1,
+      principal: Number(sum("principal").toFixed(2)),
+      interest: Number(sum("interest").toFixed(2)),
+      total: Number(sum("total").toFixed(2)),
+      remainingDebt: Number((yearData.at(-1)?.remainingDebt ?? 0).toFixed(2)),
+      totalPrincipalPaid: Number((yearData.at(-1)?.totalPrincipalPaid ?? 0).toFixed(2)),
+      totalInterestPaid: Number((yearData.at(-1)?.totalInterestPaid ?? 0).toFixed(2)),
+    };
+  });
+}
+
+export default function MortgageCalculator() {
+  const [price, setPrice] = useState(DEFAULT_PRICE);
+  const [downPayment, setDownPayment] = useState(DEFAULT_DOWN);
+  const [interestRate, setInterestRate] = useState(DEFAULT_INT);
+  const [loanTerm, setLoanTerm] = useState(DEFAULT_TERM);
+  const [view, setView] = useState(DEFAULT_VIEW);
+
+  const loanAmount = price - downPayment;
+  const monthlyInterest = calculateMonthlyInterest(interestRate);
+  const totalPayments = calculateTotalPayments(loanTerm);
+  const monthlyPayment = calculateMonthlyPayment(loanAmount, monthlyInterest, totalPayments);
+  const schedule = generateSchedule(loanAmount, monthlyInterest, monthlyPayment, totalPayments);
 
   const grouped = view === eViewMode.YEARLY
-    ? Array.from({ length: loanTerm }, (_, i) => {
-      const yearData = schedule.slice(i * 12, (i + 1) * 12);
-      const sum = (key: any) => yearData.reduce((a, b) => a + (b as any)[key], 0);
-      return {
-        month: undefined,
-        year: i + 1,
-        principal: Number(sum("principal").toFixed(2)),
-        interest: Number(sum("interest").toFixed(2)),
-        total: Number(sum("total").toFixed(2)),
-        remainingDebt: Number((yearData.at(-1)?.remainingDebt ?? 0).toFixed(2)),
-        totalPrincipalPaid: Number((yearData.at(-1)?.totalPrincipalPaid ?? 0).toFixed(2)),
-        totalInterestPaid: Number((yearData.at(-1)?.totalInterestPaid ?? 0).toFixed(2)),
-      };
-    })
+    ? groupByYear(schedule, loanTerm)
     : schedule;
 
   return (
