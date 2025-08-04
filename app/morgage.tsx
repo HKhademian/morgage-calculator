@@ -1,103 +1,152 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+
+import {
+  calculateMonthlyInterest,
+  calculateTotalPayments,
+  calculateMonthlyPayment,
+  generateSchedule,
+  groupByYear,
+  numberOrDefault,
+} from "@/lib/morgage";
+
+const enum eViewMode {
+  MONTHLY = "MONTHLY",
+  YEARLY = "YEARLY",
+};
+
+const DEFAULT_PRICE = 400_000;
+const DEFAULT_DOWN = 40_000;
+const DEFAULT_INT = 3.65;
+const DEFAULT_TERM = 30;
+const DEFAULT_VIEW = eViewMode.YEARLY;
+
+export default function MortgageCalculator() {
+  const [price, setPrice] = useState(DEFAULT_PRICE);
+  const [downPayment, setDownPayment] = useState(DEFAULT_DOWN);
+  const [interestRate, setInterestRate] = useState(DEFAULT_INT);
+  const [loanTerm, setLoanTerm] = useState(DEFAULT_TERM);
+  const [view, setView] = useState(DEFAULT_VIEW);
+
+  const loanAmount = price - downPayment;
+  const monthlyInterest = calculateMonthlyInterest(interestRate);
+  const totalPayments = calculateTotalPayments(loanTerm);
+  const monthlyPayment = calculateMonthlyPayment(loanAmount, monthlyInterest, totalPayments);
+  const schedule = generateSchedule(loanAmount, monthlyInterest, monthlyPayment, totalPayments);
+
+  const grouped = view === eViewMode.YEARLY
+    ? groupByYear(schedule, loanTerm)
+    : schedule;
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="max-w-3xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">🏡 Mortgage Repayment Calculator</h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <label className="text-sm font-medium">🏠 House Price (€)</label>
+          <Input
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(numberOrDefault(e.target.value))}
+            placeholder="House Price"
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+        <div>
+          <label className="text-sm font-medium">💰 Down Payment (€)</label>
+          <Input
+            type="number"
+            value={downPayment}
+            onChange={(e) => setDownPayment(numberOrDefault(e.target.value))}
+            placeholder="Down Payment"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+        </div>
+        <div>
+          <label className="text-sm font-medium">📊 Interest Rate (%)</label>
+          <Input
+            type="number"
+            value={interestRate}
+            onChange={(e) => setInterestRate(numberOrDefault(e.target.value))}
+            placeholder="Interest Rate"
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
+        </div>
+        <div>
+          <label className="text-sm font-medium">📆 Loan Term (Years)</label>
+          <Input
+            type="number"
+            value={loanTerm}
+            onChange={(e) => setLoanTerm(numberOrDefault(e.target.value))}
+            placeholder="Loan Term"
           />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        </div>
+      </div>
+
+      <div className="mb-6 p-4 bg-gray-100 rounded-md text-sm">
+        <p>💸 <strong>Loan Amount:</strong> €{loanAmount.toLocaleString()}</p>
+        <p>📆 <strong>Total Payments:</strong> {totalPayments} months</p>
+        <p>📥 <strong>Monthly Payment:</strong> €{monthlyPayment.toFixed(2)}</p>
+      </div>
+
+      <Tabs value={view} onValueChange={(v) => setView(v as eViewMode)} className="mb-4">
+        <TabsList>
+          <TabsTrigger value={eViewMode.MONTHLY}>Monthly</TabsTrigger>
+          <TabsTrigger value={eViewMode.YEARLY}>Yearly</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <div className="mb-8">
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={grouped}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey={view === eViewMode.YEARLY ? "year" : "month"} />
+            <YAxis />
+            <Tooltip formatter={(value: number) => `€${value.toFixed(2)}`} />
+            <Legend />
+            {/* <Line type="monotone" dataKey="principal" stroke="#4ade80" name="Principal" />
+            <Line type="monotone" dataKey="interest" stroke="#60a5fa" name="Interest" /> */}
+            <Line type="monotone" dataKey="remainingDebt" stroke="#f97316" name="Remaining Debt" />
+            <Line type="monotone" dataKey="totalPrincipalPaid" stroke="#16a34a" name="Total Principal Paid" strokeDasharray="3 3" />
+            <Line type="monotone" dataKey="totalInterestPaid" stroke="#2563eb" name="Total Interest Paid" strokeDasharray="3 3" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="grid gap-2">
+        {grouped.map((entry, i) => (
+          <Card key={i}>
+            <CardContent className="p-4 flex justify-between text-sm">
+              <span>
+                {view === eViewMode.YEARLY ? `Year ${entry.year}` : `Month ${entry.month} (Year ${entry.year})`}:
+              </span>
+              <span className="flex flex-col items-end">
+                <span>💸 Total: €{entry.total.toFixed(2)}</span>
+                <span>📉 Principal: €{entry.principal.toFixed(2)}</span>
+                <span>🧾 Interest: €{entry.interest.toFixed(2)}</span>
+                <span>💼 Remaining: €{entry.remainingDebt.toFixed(2)}</span>
+                <br />
+                <span>📉 Total Principal Paid: €{entry.totalPrincipalPaid.toFixed(2)}</span>
+                <span>🧾 Total Interest Paid: €{entry.totalInterestPaid.toFixed(2)}</span>
+                <span>💰 Total Paid: €{(entry.totalPrincipalPaid + entry.totalInterestPaid).toFixed(2)}</span>
+              </span>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
