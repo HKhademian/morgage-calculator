@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const enum eViewMode {
-  MONTHLY =  "MONTHLY" ,
+  MONTHLY = "MONTHLY",
   YEARLY = "YEARLY",
 };
 
@@ -21,7 +21,7 @@ export default function MortgageCalculator() {
   const [price, setPrice] = useState(DEFAULT_PRICE);
   const [downPayment, setDownPayment] = useState(DEFAULT_DOWN);
   const [interestRate, setInterestRate] = useState(DEFAULT_INT);
-  const [loanTerm, setLoanTerm] = useState(30);
+  const [loanTerm, setLoanTerm] = useState(DEFAULT_TERM);
   const [view, setView] = useState(DEFAULT_VIEW);
 
   const loanAmount = price - downPayment;
@@ -36,17 +36,19 @@ export default function MortgageCalculator() {
     const principal = monthlyPayment - interest;
     return {
       month: i + 1,
+      year: Math.floor(i / 12) + 1,
       principal: Number(principal.toFixed(2)),
       interest: Number(interest.toFixed(2)),
-      total: Number(monthlyPayment.toFixed(2))
+      total: Number(monthlyPayment.toFixed(2)),
     };
   });
 
   const grouped = view === eViewMode.YEARLY
     ? Array.from({ length: loanTerm }, (_, i) => {
       const yearData = schedule.slice(i * 12, (i + 1) * 12);
-      const sum = (key) => yearData.reduce((a, b) => a + b[key], 0);
+      const sum = (key: any) => yearData.reduce((a, b) => a + (b as any)[key], 0);
       return {
+        month: undefined,
         year: i + 1,
         principal: Number(sum("principal").toFixed(2)),
         interest: Number(sum("interest").toFixed(2)),
@@ -86,7 +88,7 @@ export default function MortgageCalculator() {
         />
       </div>
 
-      <Tabs value={view} onValueChange={setView} className="mb-4">
+      <Tabs value={view} onValueChange={(v) => setView(v as eViewMode)} className="mb-4">
         <TabsList>
           <TabsTrigger value={eViewMode.MONTHLY}>Monthly</TabsTrigger>
           <TabsTrigger value={eViewMode.YEARLY}>Yearly</TabsTrigger>
