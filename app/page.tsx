@@ -53,6 +53,17 @@ export default function MortgageCalculator() {
     ? groupByYear(schedule, loanTerm)
     : schedule;
 
+  const data = Array.from({ length: 30 }, (_, i) => {
+    const term = i + 1;
+    const monthlyInterest = calculateMonthlyInterest(interestRate);
+    const totalPayments = calculateTotalPayments(term);
+    const monthlyPayment = calculateMonthlyPayment(loanAmount, monthlyInterest, totalPayments);
+    return {
+      term,
+      monthlyPayment: Number(monthlyPayment.toFixed(2)),
+    };
+  });
+
   return (
     <div className="max-w-3xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">🏡 Mortgage Repayment Calculator</h1>
@@ -96,11 +107,25 @@ export default function MortgageCalculator() {
         </div>
       </div>
 
+      <div className="mb-8">
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="term" label={{ value: "Loan Term (Years)", position: "insideBottomRight", offset: -5 }} />
+            <YAxis />
+            <Tooltip formatter={(value: number) => `€${value.toFixed(2)}`} />
+            <Legend />
+            <Line type="monotone" dataKey="monthlyPayment" stroke="#0ea5e9" name="Monthly Payment" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
       <div className="mb-6 p-4 bg-gray-100 rounded-md text-sm">
         <p>💸 <strong>Loan Amount:</strong> €{loanAmount.toLocaleString()}</p>
         <p>📆 <strong>Total Payments:</strong> {totalPayments} months</p>
         <p>📥 <strong>Monthly Payment:</strong> €{monthlyPayment.toFixed(2)}</p>
       </div>
+
 
       <Tabs value={view} onValueChange={(v) => setView(v as eViewMode)} className="mb-4">
         <TabsList>
