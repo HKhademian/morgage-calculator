@@ -28,7 +28,7 @@ export default function MortgageCalculator() {
   const monthlyInterest = interestRate / 100 / 12;
   const totalPayments = loanTerm * 12;
   const monthlyPayment =
-    (loanAmount * monthlyInterest) /
+  (loanAmount * monthlyInterest) /
     (1 - Math.pow(1 + monthlyInterest, -totalPayments));
 
   let remainingDebt = loanAmount;
@@ -106,10 +106,13 @@ export default function MortgageCalculator() {
           <Card key={i}>
             <CardContent className="p-4 flex justify-between text-sm">
               <span>
-                {view === eViewMode.YEARLY ? `Year ${entry.year}` : `Month ${entry.month}`}:
+                {view === eViewMode.YEARLY ? `Year ${entry.year}` : `Month ${entry.month} (Year ${entry.year})`}:
               </span>
-              <span>
-                💸 Total: €{entry.total.toLocaleString()} → 📉 Principal: €{entry.principal.toLocaleString()} + 🧾 Interest: €{entry.interest.toLocaleString()}
+              <span className="flex flex-col items-end">
+                <span>💸 Total: €{entry.total.toFixed(2)}</span>
+                <span>📉 Principal: €{entry.principal.toFixed(2)}</span>
+                <span>🧾 Interest: €{entry.interest.toFixed(2)}</span>
+                <span>💼 Remaining: €{entry.remainingDebt.toFixed(2)}</span>
               </span>
             </CardContent>
           </Card>
