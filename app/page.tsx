@@ -21,6 +21,12 @@ const enum eViewMode {
   YEARLY = "YEARLY",
 };
 
+function numberOrDefault(value: number | string, defaultValue: number = 0): number {
+  const num = Number(value);
+  return isNaN(num) ? defaultValue : num;
+}
+
+
 const DEFAULT_PRICE = 400_000;
 const DEFAULT_DOWN = 40_000;
 const DEFAULT_INT = 3.65;
