@@ -190,7 +190,7 @@ export default function MortgageCalculator() {
       </div>
 
       <div className="grid gap-2">
-        {grouped.map((entry, i) => (
+        {[...grouped].reverse().map((entry, i) => (
           <Card key={i}>
             <CardContent className="p-4 flex justify-between text-sm">
               <span>

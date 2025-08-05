@@ -42,21 +42,11 @@ export function generateSchedule(
     let cumulativePrincipal = 0;
     let cumulativeInterest = 0;
     const schedule = [];
-    for (let month = 1; month <= totalPayments; month++) {
+    for (let month = 1; month <= totalPayments + 5; month++) {
         if (remainingDebt <= 0) {
-            schedule.push({
-                month: month,
-                year: Math.floor((month - 1) / 12) + 1,
-                remainingDebt: 0,
-                principal: 0,
-                interest: 0,
-                total: 0,
-                totalPrincipalPaid: round(cumulativePrincipal),
-                totalInterestPaid: round(cumulativeInterest),
-            });
-            continue;
+            break;
         }
-        
+
         const interest = remainingDebt * monthlyInterest;
         let principal = monthlyPayment - interest + additionalPrincipal;
         if (principal > remainingDebt + interest) {
