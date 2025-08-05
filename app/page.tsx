@@ -120,6 +120,8 @@ export default function MortgageCalculator() {
             <Line type="monotone" dataKey="monthlyPayment" stroke="#0ea5e9" name="Monthly Payment" />
           </LineChart>
         </ResponsiveContainer>
+      </div>
+      <div className="mb-8">
         <ResponsiveContainer width="100%" height={150}>
           <LineChart data={repaymentPlan}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -143,15 +145,28 @@ export default function MortgageCalculator() {
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={grouped}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey={view === eViewMode.YEARLY ? "year" : "month"} />
-            <YAxis />
-            <Tooltip formatter={formatCurrency} />
             <Legend />
-            {/* <Line type="monotone" dataKey="principal" stroke="#4ade80" name="Principal" />
-            <Line type="monotone" dataKey="interest" stroke="#60a5fa" name="Interest" /> */}
+            <YAxis />
+            <XAxis dataKey={view === eViewMode.YEARLY ? "year" : "month"} />
+            <Tooltip formatter={formatCurrency} />
             <Line type="monotone" dataKey="remainingDebt" stroke="#f97316" name="Remaining Debt" />
             <Line type="monotone" dataKey="totalPrincipalPaid" stroke="#16a34a" name="Total Principal Paid" strokeDasharray="3 3" />
             <Line type="monotone" dataKey="totalInterestPaid" stroke="#2563eb" name="Total Interest Paid" strokeDasharray="3 3" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="mb-8">
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={grouped}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <Legend />
+            <YAxis />
+            <XAxis dataKey={view === eViewMode.YEARLY ? "year" : "month"} />
+            <Tooltip formatter={formatCurrency} />
+            <Line type="monotone" dataKey="total" stroke="#f97316" name="Payment" />
+            <Line type="monotone" dataKey="principal" stroke="#16a34a" name="Principal" strokeDasharray="3 3" />
+            <Line type="monotone" dataKey="interest" stroke="#2563eb" name="Interest" strokeDasharray="3 3" />
           </LineChart>
         </ResponsiveContainer>
       </div>
