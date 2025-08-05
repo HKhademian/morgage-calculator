@@ -31,30 +31,53 @@ export function calculateMonthlyPayment(loanAmount: number, monthlyInterest: num
     return (loanAmount * monthlyInterest) / (1 - Math.pow(1 + monthlyInterest, -totalPayments));
 }
 
-export function generateSchedule(loanAmount: number, monthlyInterest: number, monthlyPayment: number, totalPayments: number) {
+export function generateSchedule(
+    loanAmount: number,
+    monthlyInterest: number,
+    monthlyPayment: number,
+    totalPayments: number,
+    additionalPrincipal: number = 0,
+) {
     let remainingDebt = loanAmount;
     let cumulativePrincipal = 0;
     let cumulativeInterest = 0;
-
-    return range(1, totalPayments + 1).map(month => {
+    const schedule = [];
+    for (let month = 1; month <= totalPayments; month++) {
+        if (remainingDebt <= 0) {
+            schedule.push({
+                month: month,
+                year: Math.floor((month - 1) / 12) + 1,
+                remainingDebt: 0,
+                principal: 0,
+                interest: 0,
+                total: 0,
+                totalPrincipalPaid: round(cumulativePrincipal),
+                totalInterestPaid: round(cumulativeInterest),
+            });
+            continue;
+        }
+        
         const interest = remainingDebt * monthlyInterest;
-        const principal = monthlyPayment - interest;
+        let principal = monthlyPayment - interest + additionalPrincipal;
+        if (principal > remainingDebt + interest) {
+            principal = remainingDebt;
+        }
         const currentDebt = remainingDebt;
         remainingDebt -= principal;
         cumulativePrincipal += principal;
         cumulativeInterest += interest;
-
-        return {
+        schedule.push({
             month: month,
             year: Math.floor((month - 1) / 12) + 1,
             remainingDebt: round(currentDebt),
             principal: round(principal),
             interest: round(interest),
-            total: round(monthlyPayment),
+            total: round(monthlyPayment + additionalPrincipal),
             totalPrincipalPaid: round(cumulativePrincipal),
             totalInterestPaid: round(cumulativeInterest),
-        };
-    });
+        });
+    }
+    return schedule;
 }
 
 export function groupByYear(schedule: any[], loanTerm: number) {

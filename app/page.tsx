@@ -37,20 +37,24 @@ const DEFAULT_PRICE = 400_000;
 const DEFAULT_DOWN = 40_000;
 const DEFAULT_INT = 3.65;
 const DEFAULT_TERM = 30;
+const DEFAULT_ADDITIONAL_PAYMENT = 0;
 const DEFAULT_VIEW = eViewMode.YEARLY;
+
 
 export default function MortgageCalculator() {
   const [price, setPrice] = useState(DEFAULT_PRICE);
   const [downPayment, setDownPayment] = useState(DEFAULT_DOWN);
   const [interestRate, setInterestRate] = useState(DEFAULT_INT);
   const [loanTerm, setLoanTerm] = useState(DEFAULT_TERM);
+  const [additionalPayment, setAdditionalPayment] = useState(DEFAULT_ADDITIONAL_PAYMENT);
   const [view, setView] = useState(DEFAULT_VIEW);
 
   const loanAmount = price - downPayment;
   const monthlyInterest = calculateMonthlyInterest(interestRate);
   const totalPayments = calculateTotalPayments(loanTerm);
   const monthlyPayment = calculateMonthlyPayment(loanAmount, monthlyInterest, totalPayments);
-  const schedule = generateSchedule(loanAmount, monthlyInterest, monthlyPayment, totalPayments);
+
+  const schedule = generateSchedule(loanAmount, monthlyInterest, monthlyPayment, totalPayments, additionalPayment);
   const grouped = view === eViewMode.YEARLY
     ? groupByYear(schedule, loanTerm)
     : schedule;
@@ -69,6 +73,7 @@ export default function MortgageCalculator() {
             value={price}
             onChange={(e) => setPrice(numberOrDefault(e.target.value))}
             placeholder="House Price"
+            min={0}
           />
         </div>
         <div>
@@ -78,6 +83,7 @@ export default function MortgageCalculator() {
             value={downPayment}
             onChange={(e) => setDownPayment(numberOrDefault(e.target.value))}
             placeholder="Down Payment"
+            min={0}
           />
         </div>
         <div>
@@ -87,6 +93,7 @@ export default function MortgageCalculator() {
             value={interestRate}
             onChange={(e) => setInterestRate(numberOrDefault(e.target.value))}
             placeholder="Interest Rate"
+            min={0}
           />
         </div>
         <div>
@@ -96,6 +103,17 @@ export default function MortgageCalculator() {
             value={loanTerm}
             onChange={(e) => setLoanTerm(numberOrDefault(e.target.value))}
             placeholder="Loan Term"
+            min={1}
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium">➕ Additional Principal Payment (€ / month)</label>
+          <Input
+            type="number"
+            value={additionalPayment}
+            onChange={(e) => setAdditionalPayment(numberOrDefault(e.target.value))}
+            placeholder="Additional Payment"
+            min={0}
           />
         </div>
       </div>
